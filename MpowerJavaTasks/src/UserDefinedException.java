@@ -11,6 +11,7 @@ public class UserDefinedException {
 	
 	if(no < 0 || no > 100)
 		throw new InvalidAmountException("Amount Value not in range of 1-100");
+	
 	}
 
 }
