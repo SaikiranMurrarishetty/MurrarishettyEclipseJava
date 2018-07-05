@@ -3,31 +3,28 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.*;
-public class EmployeeExample {
 
+
+class EmployeeInformation
+{
 	ArrayList<EmployeeDetails> EmpAl = new ArrayList<EmployeeDetails>();
 	Connection con = null;
-   
-    
-	public static void main(String[] args) throws IOException
+
+	//Singleton Approach---Only Single Java Object Possible for this class
+	public static EmployeeInformation SingleInstanceofClass = null;
+	public static EmployeeInformation getInstance()
 	{
-	// TODO Auto-generated method stub
-	
-	System.out.println("Please Choose One Option:\n"
-					  + "1.DisplayEmployeeData\n"
-					  + "2.InsertEmployeeData");
-	
-	Scanner sc			 = new Scanner(System.in);
-	EmployeeExample e 	 = new EmployeeExample();
-	int choice			 = sc.nextInt();
-	
-	if(choice == 1)
-		e.getEmployeeData();
-	else if(choice == 2)
-		e.insertEmloyeeData();
-}
-	
-	
+		if(SingleInstanceofClass == null)
+			SingleInstanceofClass = new EmployeeInformation();
+		
+		return SingleInstanceofClass;
+	}
+    private EmployeeInformation()
+    {
+    System.out.println("Private Constructor for Singleton class");	
+    }
+    //
+    
 	void insertEmloyeeData() throws IOException
 	{
 			int Eid = 0,res = 0,count = 0;
@@ -58,7 +55,9 @@ public class EmployeeExample {
 		    try
 		    {
 		    	
-		    	con       			 = DriverManager.getConnection("jdbc:mysql://localhost:3306/feedback?useSSL=false&serverTimezone=UTC", "root", "root");
+		    	if(con == null)
+		    	con = OpenConnection();
+		    	
 		    	PreparedStatement ps = con.prepareStatement("Insert Into Employee Values(?,?,?,?)");
 		    	Iterator<EmployeeDetails> itr = EmpAl.iterator();
 		    	
@@ -85,11 +84,11 @@ public class EmployeeExample {
 	void getEmployeeData()
 	{
 		
-		try
-		{
-		
-    	con       			 = DriverManager.getConnection("jdbc:mysql://localhost:3306/feedback?useSSL=false&serverTimezone=UTC", "root", "root");
-    	Statement st		 = con.createStatement();
+		if(con == null)
+		con = OpenConnection();
+    	try
+    	{
+		Statement st		 = con.createStatement();
     	ResultSet r			 = st.executeQuery("Select * from Employee");
     	System.out.println("---------------------------------");
     		while(r.next())
@@ -101,13 +100,101 @@ public class EmployeeExample {
     		System.out.println("---------------------------------");
 	
     		}
-		}
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+
+	}
 	
+	
+	void getEmployeeData(int eid)
+	{
+		
+		if(con == null)
+		con = OpenConnection();
+    	try
+    	{
+		Statement st		 = con.createStatement();
+    	ResultSet r			 = st.executeQuery("Select * from Employee where emp_id ="+eid);
+    	System.out.println("---------------------------------");
+    		while(r.next())
+    		{
+    		System.out.println("Employe Id:"+r.getInt(1)+
+    						   "\nEmployee Name:"+r.getString(2)+
+    						   "\nEmployee Phone:"+r.getString(3)+
+    						   "\nEmployee Address:"+r.getString(4));
+    		System.out.println("---------------------------------");
+	
+    		}
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+
+	}
+	Connection OpenConnection()
+	{
+		try 
+		{
+			con       			 = DriverManager.getConnection("jdbc:mysql://localhost:3306/feedback?useSSL=false&serverTimezone=UTC", "root", "root");
+	    		
+		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
-	
+		return con;
+		
 	}
 
+}
+
+
+
+
+
+
+public class EmployeeExample 
+{
+    
+	public static void main(String[] args) throws IOException
+	{
+	// TODO Auto-generated method stub
+	
+	System.out.println("Please Choose One Option:\n"
+					  + "1.DisplayEmployeeData\n"
+					  + "2.InsertEmployeeData");
+	
+	Scanner sc			 = new Scanner(System.in);
+	EmployeeInformation e 	 = EmployeeInformation.getInstance();
+	int choice			 = sc.nextInt();
+	int eid = 0;
+	
+	if(choice == 1)
+	{
+		System.out.println("Please Choose One Option:\n"
+				  + "1.Fetch Single Record\n"
+				  + "2.Fetch All Records");
+		choice			 = sc.nextInt();
+		if(choice == 1)
+		{
+			System.out.println("Enter Employee ID: ");
+			eid			 = sc.nextInt();
+			e.getEmployeeData(eid);	
+		}
+		else
+		{
+			e.getEmployeeData();
+	
+		}
+	}
+	else if(choice == 2)
+	{
+		e.insertEmloyeeData();
+	}
+   }
+	
 }

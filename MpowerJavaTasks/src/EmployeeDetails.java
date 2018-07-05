@@ -13,5 +13,4 @@ public class EmployeeDetails {
 	 EmployeePhoneNo = phn;
 	 EmployeeAddress = address;
  }
-
 }
